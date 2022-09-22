@@ -38,4 +38,21 @@ direction is not yet implemented).
 Note that the local port numbers are reversed in Bedrock vs. our legacy system.
 The local L1 is on port 8545 and the local L2 is on port 9545.
 
+We have set up the following submodules for upstream components which we need
+to modify. In cases where no modifications are needed, we allow the upstream
+projects to import those submodules from their original sources.
+
+Modules are listed as <local_path>:<repo_name>
+
+v3-boba
+  erigon:v3-erigon
+    erigon-lib:v3-erigon-lib
+      interfaces:v3-erigon-interfaces
+  optimism:v3-optimism
+    op-geth:v3-op-geth
+  legacy:boba
+
+When contributing to a submodule it is necessary to set a git pushurl which
+uses the SSH protocol rather than https:
+> git remote set-url --push origin git@github.com:bobanetwork/<repo_name>
 
