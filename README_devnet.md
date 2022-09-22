@@ -7,9 +7,9 @@ After cloning this repository, follow these steps to build and launch a
 local development stack:
 
 > git submodule init
-> git submodule update --recursive
+> git submodule update --recursive --init
 
-Note that the Erigon and Op-geth repositories will pull in a large amount of
+Note that the Erigon and op-geth repositories will pull in a large amount of
 test data, so ensure that you have sufficient disk space (at least 18 GiB).
 
 > cd erigon
