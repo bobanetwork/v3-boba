@@ -28,7 +28,7 @@ addr=Web3.toChecksumAddress("0xb0bA04c08d8f1471bcA20C12a64DcCa17B01d96f")
 key="c9776e5eb09b348dfde140019e21142503d3c2a5c6d2019d0b30f5099ff2c8dd"
 
 balStart = w3.eth.getBalance(addr)
-print ("L1 Balance Before:", balStart)
+print ("L1 Balance Start:", balStart)
 
 with open("../../optimism/packages/contracts-bedrock/artifacts/contracts/L2/L2StandardBridge.sol/L2StandardBridge.json") as f:
   abi = json.loads(f.read())['abi']
@@ -67,10 +67,10 @@ tx = l2mp.functions.initiateWithdrawal(
 
 signed_txn =l2.eth.account.sign_transaction(tx, key)
 ret2 = l2.eth.send_raw_transaction(signed_txn.rawTransaction)
-print("Submitted ETH TX", Web3.toHex(ret2))
+print("Submitted ETH Withdrawal TX", Web3.toHex(ret2))
       
 rcpt = l2.eth.wait_for_transaction_receipt(ret2)
-print("Got ETH receipt in block", rcpt.blockNumber, "status", rcpt.status, "time", time.time() - T0, "gasPrice", rcpt.effectiveGasPrice)
+print("Got receipt in block", rcpt.blockNumber, "status", rcpt.status, "time", time.time() - T0, "gasPrice", rcpt.effectiveGasPrice)
 assert(rcpt.status == 1)
 print("Tx", Web3.toHex(ret2), "BN", rcpt.blockNumber)
 
@@ -84,6 +84,10 @@ mTmp = Web3.toHex(mHash) + "0000000000000000000000000000000000000000000000000000
 mKey = Web3.sha3(hexstr=mTmp)
 print("Withdrawal msgHash", Web3.toHex(mHash), "storageKey", Web3.toHex(mKey))
 
+# Hack to test overlapping withdrawal requests
+#print("Delaying at", l2.eth.blockNumber)
+#time.sleep(75)
+#print("Continuing at", l2.eth.blockNumber)
 
 # Wait for an opportunity to construt a proof
 atBlock = l2.eth.blockNumber
@@ -136,6 +140,10 @@ tx = l1op.functions.finalizeWithdrawalTransaction(
        'from':addr,
        'chainId': 900,
   })
+  
+balStart = w3.eth.getBalance(addr)
+print ("L1 Balance BeforeTx:", balStart)
+ 
 signed_txn =w3.eth.account.sign_transaction(tx, key)
 ret2 = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
 print("Submitted Withdrawal TX", Web3.toHex(ret2))
@@ -145,5 +153,7 @@ print("Got receipt in block", rcpt.blockNumber, "status", rcpt.status, "time", t
 #print(rcpt)
 assert(rcpt.status == 1)
 
-print ("L1 Balance After:", w3.eth.getBalance(addr))
-print ("Balance change:", Web3.fromWei(w3.eth.getBalance(addr) - balStart,'ether'))
+balFinal = w3.eth.getBalance(addr)
+print ("L1 Balance After:", balFinal)
+assert(balFinal > balStart)
+print ("Balance change:", Web3.fromWei(balFinal - balStart,'ether'))
