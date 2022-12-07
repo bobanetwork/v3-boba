@@ -36,7 +36,11 @@ dest=Web3.toChecksumAddress("0x6900000000000000000000000000000000000001")
 
 with open("../../optimism/packages/contracts-bedrock/artifacts/contracts/boba/BOBA.sol/BOBA.json") as f:
   abi = json.loads(f.read())['abi']
-boba_l1 = w3.eth.contract(address="0xBcDfc870Ea0C6463C6EBb2B2217a4b32B93BCFB7", abi=abi)
+boba_l1 = w3.eth.contract(address="0x154C5E3762FbB57427d6B03E7302BDA04C497226", abi=abi)
+
+with open("../../optimism/packages/contracts-bedrock/artifacts/contracts/universal/OptimismMintableERC20.sol/OptimismMintableERC20.json") as f:
+  abi = json.loads(f.read())['abi']
+
 boba_l2 = l2.eth.contract(address=Web3.toChecksumAddress("0x42000000000000000000000000000000000000fe"), abi=abi)
 
 with open("../../optimism/packages/contracts-bedrock/artifacts/contracts/L1/L1StandardBridge.sol/L1StandardBridge.json") as f:
@@ -113,8 +117,8 @@ while cc:
   # It takes time to process deposits so these will lag. 
   ethBalance = l2.eth.getBalance(addr)
   bobaBalance = boba_l2.functions.balanceOf(addr).call()
+
   print()
   print("L2 ETH balance:", Web3.fromWei(ethBalance,'ether'))
   print("L2 BOBA balance:", Web3.fromWei(bobaBalance, 'ether'))
   time.sleep(1)
-  

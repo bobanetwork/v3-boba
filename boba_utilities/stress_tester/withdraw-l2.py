@@ -75,10 +75,9 @@ assert(rcpt.status == 1)
 print("Tx", Web3.toHex(ret2), "BN", rcpt.blockNumber)
 
 log1 = l2mp.events.MessagePassed().processReceipt(rcpt,errors=DISCARD)
-log2 = l2mp.events.MessagePassedExtension1().processReceipt(rcpt, errors=DISCARD)
-
 wt = log1[0].args
-mHash = log2[0].args.hash
+mHash = log1[0].args.withdrawalHash
+
 # print("withdrawal msg",wt)
 mTmp = Web3.toHex(mHash) + "0000000000000000000000000000000000000000000000000000000000000000"
 mKey = Web3.sha3(hexstr=mTmp)
@@ -104,7 +103,7 @@ print("Block stateRoot {} blockHash {}".format(Web3.toHex(bb.stateRoot), Web3.to
 print()
 print("Will call eth.getProof")
 aProof = l2.eth.getProof("0x4200000000000000000000000000000000000016", [mKey], 'latest')
-print("Proof retuned storageHash {}", Web3.toHex(aProof.storageHash))
+print("Proof retuned storageHash {}".format(Web3.toHex(aProof.storageHash)))
 print()
 print("Account Proof:", aProof.accountProof)
 sProof = rlp.encode(aProof.storageProof[0].proof)
@@ -125,16 +124,18 @@ while obn < atBlock:
   time.sleep(5)
   obn = l2oo.functions.latestBlockNumber().call()
 
-oProp = l2oo.functions.getL2Output(obn).call()
-print("Output Root {} Timestamp {}".format(Web3.toHex(oProp[0]), oProp[1]))
+oProp = l2oo.functions.getL2OutputAfter(obn).call()
+print("Output Root {} Timestamp {}".format(Web3.toHex(oProp[0]), oProp[2]))
 
 # For non-zero challenge period, wait here until valid Timestamp
 
-tx = l1op.functions.finalizeWithdrawalTransaction(
+oIdx = l2oo.functions.getL2OutputIndexAfter(obn).call()
+
+tx = l1op.functions.proveWithdrawalTransaction(
 	wt,
-	obn,
+	oIdx,
 	orp,
-	sProof
+	aProof.storageProof[0].proof # sproof
   ).buildTransaction({
        'nonce': w3.eth.get_transaction_count(addr),
        'from':addr,
@@ -146,7 +147,23 @@ print ("L1 Balance BeforeTx:", balStart)
  
 signed_txn =w3.eth.account.sign_transaction(tx, key)
 ret2 = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
-print("Submitted Withdrawal TX", Web3.toHex(ret2))
+print("Submitted WithdrawalProof TX", Web3.toHex(ret2))
+
+rcpt = w3.eth.wait_for_transaction_receipt(ret2)
+print("Got receipt in block", rcpt.blockNumber, "status", rcpt.status, "time", time.time() - T0, "gasPrice", rcpt.effectiveGasPrice)
+#print(rcpt)
+assert(rcpt.status == 1)
+
+tx = l1op.functions.finalizeWithdrawalTransaction(
+	wt
+  ).buildTransaction({
+       'nonce': w3.eth.get_transaction_count(addr),
+       'from':addr,
+       'chainId': 900,
+  })
+signed_txn =w3.eth.account.sign_transaction(tx, key)
+ret2 = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+print("Submitted WithdrawFinal TX", Web3.toHex(ret2))
       
 rcpt = w3.eth.wait_for_transaction_receipt(ret2)
 print("Got receipt in block", rcpt.blockNumber, "status", rcpt.status, "time", time.time() - T0, "gasPrice", rcpt.effectiveGasPrice)
