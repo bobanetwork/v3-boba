@@ -54,14 +54,36 @@ print("Starting at blocks", w3.eth.blockNumber, l2.eth.blockNumber)
 
 T0 = time.time()
 
+if False:
+  # Basic health check
+  tx = {
+      'type':2,
+      'nonce': l2.eth.get_transaction_count(addr),
+      'from':addr,
+      'to':addr,
+      'gas':21000,
+      'maxFeePerGas':Web3.toWei(10, 'gwei'),
+      'maxPriorityFeePerGas':Web3.toWei(10, 'gwei'),
+      'chainId': 901,
+      'value':Web3.toWei(123, 'wei'),
+  }
+  signed_txn =l2.eth.account.sign_transaction(tx, key)
+  ret2 = l2.eth.send_raw_transaction(signed_txn.rawTransaction)
+  print("healthcheck tx", Web3.toHex(ret2))
+  rcpt = l2.eth.wait_for_transaction_receipt(ret2)
+  print("test-send tx", rcpt)
+  assert(rcpt.status == 1)
+
 tx = l2mp.functions.initiateWithdrawal(
 	addr,
-	4000000,
+	100000,
 	"",
       ).buildTransaction({
        'nonce': l2.eth.get_transaction_count(addr),
        'from':addr,
        'chainId': 901,
+       'gas':100000,
+       'maxFeePerGas':Web3.toWei(10, 'gwei'),
        'value':Web3.toWei(0.005, 'ether'),
       })
 
@@ -71,6 +93,9 @@ print("Submitted ETH Withdrawal TX", Web3.toHex(ret2))
       
 rcpt = l2.eth.wait_for_transaction_receipt(ret2)
 print("Got receipt in block", rcpt.blockNumber, "status", rcpt.status, "time", time.time() - T0, "gasPrice", rcpt.effectiveGasPrice)
+if rcpt.status != 1:
+  print("FAILED:", rcpt)
+
 assert(rcpt.status == 1)
 print("Tx", Web3.toHex(ret2), "BN", rcpt.blockNumber)
 
