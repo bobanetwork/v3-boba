@@ -104,6 +104,8 @@ while cc:
           'from':addr,
           'chainId': 900
 	})
+  tx['gas'] = int(w3.eth.estimate_gas(tx) * 1.5)
+
   signed_txn =w3.eth.account.sign_transaction(tx, key)
   ret2 = w3.eth.send_raw_transaction(signed_txn.rawTransaction)
   print("Submitted BOBA TX", Web3.toHex(ret2))
