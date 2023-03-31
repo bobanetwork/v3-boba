@@ -56,3 +56,6 @@ When contributing to a submodule it is necessary to set a git pushurl which
 uses the SSH protocol rather than https:
 > git remote set-url --push origin git@github.com:bobanetwork/<repo_name>
 
+**Note**
+
+The initial creation of L2 blocks is  based on the timestamp in `.devnet/rollup.json` and `.devnet/genesis-l2.json`, so you **have to** re-do the regenesis if you want to start with a blank block chain every time. The regenesis code is in `ops-bedrock/devnet-up.sh`.
