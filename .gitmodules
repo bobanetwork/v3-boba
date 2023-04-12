@@ -4,6 +4,3 @@
 [submodule "optimism"]
 	path = optimism
 	url = https://github.com/bobanetwork/v3-anchorage.git
-[submodule "erigon"]
-	path = erigon
-	url = https://github.com/bobanetwork/v3-erigon.git
