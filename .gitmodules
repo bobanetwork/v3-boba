@@ -3,7 +3,7 @@
 	url = https://github.com/bobanetwork/boba.git
 [submodule "optimism"]
 	path = optimism
-	url = https://github.com/bobanetwork/v3-optimism.git
+	url = https://github.com/bobanetwork/v3-anchorage.git
 [submodule "erigon"]
 	path = erigon
 	url = https://github.com/bobanetwork/v3-erigon.git
